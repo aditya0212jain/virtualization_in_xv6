@@ -17,3 +17,6 @@
 #define NUMOFMESSAGEBUFFERS 5001
 #define MessageSize 16
 #define SIGKILL
+
+//custom added for assignment 3
+#define NCONTAINER 15

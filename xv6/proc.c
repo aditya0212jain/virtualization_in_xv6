@@ -104,8 +104,6 @@ void receiverHandler(void){
   }
   cprintf("this is the default handler for receiving messages\n");
   return;
-  // cprintf("this is for multicast %d\n",myproc()->pid);
-  // cprintf("myid: %d , cpu pid : %d \n",myproc()->pid,mycpu()->proc->pid);
 }
 
 // void
@@ -188,7 +186,8 @@ found:
     *(p->msg_from_multicast+i) = *(temp+i);
   }
   // p->msg_from_multicast = temp;
-  
+  p->container_id = 0;//zero for all access
+  p->v_state = V_EMBRYO;  
 
   return p;
 }

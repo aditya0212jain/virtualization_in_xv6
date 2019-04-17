@@ -264,7 +264,8 @@ int sys_sigraise(void)
 int 
 sys_create_container(void)
 {
-  return 0;
+  int a = get_container();
+  return a;
 }
 
 int 
@@ -276,6 +277,9 @@ sys_destroy_container(void)
 int 
 sys_join_container(void)
 {
+  int container_id;
+  argint(0,&container_id);
+  myproc()->container_id = container_id;
   return 2;
 }
 

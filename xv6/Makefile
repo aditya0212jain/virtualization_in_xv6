@@ -29,6 +29,7 @@ OBJS = \
 	vm.o\
 	message.o\
 	queue.o\
+	container_manager.o\
 	#added for message.c
 
 # Cross-compiling (e.g., on Mac OS X)

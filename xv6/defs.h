@@ -212,3 +212,8 @@ int             enqueue(queue* q, int a);
 int             dequeue(queue* q);
 int             isFull(queue* q);
 int             getQueueSize(queue* q);
+
+//container_manager.c
+int             get_container(void);
+int             checkit(void);
+void            container_init(void);
