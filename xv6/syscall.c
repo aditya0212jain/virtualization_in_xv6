@@ -10,8 +10,8 @@
 
 
 /////Defined on 8th Feb for systrace
-int syscall_trace[34]={0};
-char numToCall[34][20] = {
+int syscall_trace[38]={0};
+char numToCall[38][30] = {
       "random",
       "sys_fork",
       "sys_exit",
@@ -45,7 +45,11 @@ char numToCall[34][20] = {
       "sys_sigraise",
       "sys_halt",
       "sys_recv_multi",
-      "sys_change_state"
+      "sys_change_state",
+      "sys_create_container",
+      "sys_destroy_container",
+      "sys_join_container",
+      "sys_leave_container"
 };
 int sys_trace=0;//change this before submission
 //////////////////////////////
@@ -159,6 +163,10 @@ extern int sys_sigraise(void);
 extern int sys_halt(void);
 extern int sys_recv_multi(void);
 extern int sys_change_state(void);
+extern int sys_create_container(void);
+extern int sys_destroy_container(void);
+extern int sys_join_container(void);
+extern int sys_leave_container(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -194,6 +202,10 @@ static int (*syscalls[])(void) = {
 [SYS_halt]    sys_halt,
 [SYS_recv_multi] sys_recv_multi,
 [SYS_change_state] sys_change_state,
+[SYS_create_container] sys_create_container,
+[SYS_destroy_container] sys_destroy_container,
+[SYS_join_container] sys_join_container,
+[SYS_leave_container] sys_leave_container,
 };
 
 

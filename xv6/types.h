@@ -10,8 +10,8 @@ typedef int MessageBuffer[MessageSize];
 
 
 //custom added for assignment
-extern int syscall_trace[34];
-extern char numToCall[34][20];
+extern int syscall_trace[38];
+extern char numToCall[38][30];
 extern int sys_trace;
 
 #define MSGSIZE 16

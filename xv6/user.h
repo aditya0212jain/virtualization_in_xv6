@@ -36,6 +36,10 @@ int signal(int, sighandler_t handler);
 int sigraise(int,int);
 int recv_multi(void*);
 int change_state(int);
+int create_container(void);
+int destroy_container(int);
+int leave_container(void);
+int join_container(int);
 
 
 // ulib.c

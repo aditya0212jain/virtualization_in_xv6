@@ -34,3 +34,7 @@
 #define SYS_halt   31
 #define SYS_recv_multi 32
 #define SYS_change_state 33
+#define SYS_create_container 34
+#define SYS_destroy_container 35
+#define SYS_join_container 36
+#define SYS_leave_container 37
