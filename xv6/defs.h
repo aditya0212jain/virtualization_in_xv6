@@ -128,7 +128,7 @@ int             sigraise(int,int);// sending the signal to the process with pid
 int             sent_to_proc_buffer(int s_pid,int r_pid,void *msg);
 int             receive_from_procbuffer(int myid,void* msg);
 ///added for assignment 3
-int             destroy_container_processes(int a);
+int             destroy_container_processes(int pid,int a,int pcid);
 
 
 // swtch.S

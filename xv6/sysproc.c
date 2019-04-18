@@ -274,8 +274,8 @@ sys_destroy_container(void)
   int container_id;
   argint(0,&container_id);
   destroy_container_kernel(container_id);
-  destroy_container_processes(container_id);
-  return 1;
+  destroy_container_processes(myproc()->pid,container_id,myproc()->container_id);
+  return 0;
 }
 
 int 
