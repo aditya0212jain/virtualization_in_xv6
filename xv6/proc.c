@@ -663,12 +663,12 @@ procdump(void)
 //CUSTOM -------------------------------------------------------------------------------------------------------------------------------------------
 
 void 
-print_ps(void)
+print_ps(int cid)
 {
   struct proc *p;
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state != UNUSED)
+    if(p->state != UNUSED && p->container_id == cid)
       cprintf("pid:%d name:%s\n",p->pid,p->name);
   release(&ptable.lock);
 }

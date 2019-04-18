@@ -121,7 +121,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-void            print_ps(void);//added for sys_ps
+void            print_ps(int cid);//added for sys_ps // changed for assign3 
 int             sleep_receiver(void);
 int             signal(int,sighandler_t);//setting the handler for signal for current proc
 int             sigraise(int,int);// sending the signal to the process with pid

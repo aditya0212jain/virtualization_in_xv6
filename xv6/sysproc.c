@@ -131,7 +131,7 @@ sys_add(void)
 int 
 sys_ps(void)
 {
-  print_ps();
+  print_ps(myproc()->container_id);
   return 0;
 }
 
