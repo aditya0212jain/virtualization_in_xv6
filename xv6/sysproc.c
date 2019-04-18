@@ -295,6 +295,6 @@ sys_leave_container(void)
     return -1;
   }
   int stat = remove_process_from_container(myproc()->pid,myproc()->container_id);
-  myproc()->container_id = 0;/// <-------- Check this line fot specs
+  myproc()->container_id = 0;/// <-------- Check this line for specs
   return stat;
 }

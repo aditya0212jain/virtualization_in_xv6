@@ -24,7 +24,6 @@ struct {
     struct container container[NCONTAINER];
 } container_table;
 
-// int freeslot = 0;
 
 void 
 container_init()

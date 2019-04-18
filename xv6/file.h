@@ -5,6 +5,7 @@ struct file {
   char writable;
   struct pipe *pipe;
   struct inode *ip;
+  
   uint off;
 };
 
@@ -23,6 +24,8 @@ struct inode {
   short nlink;
   uint size;
   uint addrs[NDIRECT+1];
+  //custom
+  int container_id;
 };
 
 // table mapping major device number to

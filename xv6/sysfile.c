@@ -75,7 +75,11 @@ sys_read(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
-  return fileread(f, p, n);
+  if(f->ip->container_id==myproc()->container_id){
+    return fileread(f, p, n);
+  }else{
+    return -1;
+  }
 }
 
 int
@@ -87,7 +91,16 @@ sys_write(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
-  return filewrite(f, p, n);
+  
+  if(f->ip->container_id==0){
+    return filewrite(f,p,n);
+  }
+
+  if(f->ip->container_id==myproc()->container_id){
+    return filewrite(f, p, n);
+  }else{
+    return -1;
+  }
 }
 
 int
@@ -99,8 +112,13 @@ sys_close(void)
   if(argfd(0, &fd, &f) < 0)
     return -1;
   myproc()->ofile[fd] = 0;
-  fileclose(f);
-  return 0;
+  
+  if(f->ip->container_id==myproc()->container_id){
+    fileclose(f);
+    return 0;
+  }else{
+    return -1;
+  }
 }
 
 int
@@ -291,46 +309,59 @@ sys_open(void)
   struct file *f;
   struct inode *ip;
 
+
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
     return -1;
 
   begin_op();
+  cprintf("Container id in open : %d\n",myproc()->container_id);
 
   if(omode & O_CREATE){
     ip = create(path, T_FILE, 0, 0);
+    cprintf("5\n");
     if(ip == 0){
       end_op();
       return -1;
     }
+    cprintf("6\n");
+    ip->container_id = myproc()->container_id;
   } else {
     if((ip = namei(path)) == 0){
       end_op();
+      cprintf("7\n");
       return -1;
     }
     ilock(ip);
     if(ip->type == T_DIR && omode != O_RDONLY){
       iunlockput(ip);
       end_op();
+      cprintf("8\n");
       return -1;
     }
   }
-
+  cprintf("4\n");
   if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
     if(f)
       fileclose(f);
     iunlockput(ip);
     end_op();
+    cprintf("3\n");
     return -1;
   }
   iunlock(ip);
   end_op();
-
+  cprintf("2\n");
   f->type = FD_INODE;
   f->ip = ip;
   f->off = 0;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
-  return fd;
+  cprintf("1\n");
+  if (f->ip->container_id==myproc()->container_id){
+    cprintf("fd %d \n",fd);
+    return fd;
+  }
+  return -1;
 }
 
 int
