@@ -127,6 +127,8 @@ int             signal(int,sighandler_t);//setting the handler for signal for cu
 int             sigraise(int,int);// sending the signal to the process with pid
 int             sent_to_proc_buffer(int s_pid,int r_pid,void *msg);
 int             receive_from_procbuffer(int myid,void* msg);
+///added for assignment 3
+int             destroy_container_processes(int a);
 
 
 // swtch.S
@@ -217,3 +219,6 @@ int             getQueueSize(queue* q);
 int             get_container(void);
 int             checkit(void);
 void            container_init(void);
+int             destroy_container_kernel(int a);
+int             set_process_to_container(int pid,int cid);
+int             remove_process_from_container(int pid,int cid);

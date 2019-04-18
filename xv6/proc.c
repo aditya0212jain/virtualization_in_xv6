@@ -768,3 +768,17 @@ receive_from_procbuffer(int myid,void* msg)
   release(&procbuffer_lock[myid]);    
     return 0;
 }
+
+int 
+destroy_container_processes(int a)
+{
+  struct proc *p;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if( p->container_id == a ){
+      kill(p->pid);
+    }
+  }
+  release(&ptable.lock);
+  return 0;
+}

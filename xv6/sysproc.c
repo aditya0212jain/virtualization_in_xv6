@@ -271,6 +271,10 @@ sys_create_container(void)
 int 
 sys_destroy_container(void)
 {
+  int container_id;
+  argint(0,&container_id);
+  destroy_container_kernel(container_id);
+  destroy_container_processes(container_id);
   return 1;
 }
 
@@ -280,11 +284,17 @@ sys_join_container(void)
   int container_id;
   argint(0,&container_id);
   myproc()->container_id = container_id;
-  return 2;
+  int stat  = set_process_to_container(myproc()->pid,container_id);
+  return stat;
 }
 
 int 
 sys_leave_container(void)
 {
-  return 3;
+  if(myproc()->container_id==0){
+    return -1;
+  }
+  int stat = remove_process_from_container(myproc()->pid,myproc()->container_id);
+  myproc()->container_id = 0;/// <-------- Check this line fot specs
+  return stat;
 }

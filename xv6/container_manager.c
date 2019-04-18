@@ -55,7 +55,42 @@ get_container(void)
     return -1;
 }
 
-int checkit()
+int
+destroy_container_kernel(int a)
 {
+    acquire(&container_table.lock);
+    container_table.container[a].status = 0;
+    for(int i=0;i<NPROC;i++){
+        container_table.container[a].proc[i] = 0;
+    }
+    release(&container_table.lock);
+    return -1;
+}
+
+int 
+set_process_to_container(int pid,int cid)
+{
+    acquire(&container_table.lock);
+    if(container_table.container[cid].status==0){
+        release(&container_table.lock);
+        return -1;
+    }else{
+        container_table.container[cid].proc[pid] = 1;
+    }
+    release(&container_table.lock);   
+    return 0;
+}
+
+int 
+remove_process_from_container(int pid,int cid)
+{
+    acquire(&container_table.lock);
+    if(container_table.container[cid].status==0){
+        release(&container_table.lock);
+        return -1;
+    }else{
+        container_table.container[cid].proc[pid] = 0;
+    }
+    release(&container_table.lock);   
     return 0;
 }
