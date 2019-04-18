@@ -187,7 +187,7 @@ found:
   }
   // p->msg_from_multicast = temp;
   p->container_id = 0;//zero for all access
-  p->v_state = V_EMBRYO;  
+  // p->v_state = V_EMBRYO;  
 
   return p;
 }
@@ -410,23 +410,39 @@ scheduler(void)
   for(;;){
     // Enable interrupts on this processor.
     sti();
-    
-
     // Loop over process table looking for process to run.
+    int cid = get_container_to_run();
+    int* container_processes = get_container_processes_to_run(cid);
+    int last_process = get_container_last_process(cid);
+    // cprintf("container_to_run : %d\n",cid);
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
+    int count = 0;
+    last_process = (last_process+1)%NPROC;
+    while(count<NPROC){
+      p = &ptable.proc[last_process];
+      if(p->state != RUNNABLE){
+        count++;
+        last_process = (last_process+1)%NPROC;
         continue;
+      }
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
+      if(container_processes[p->pid]==0 && p->container_id!=0){
+        count++;
+        last_process = (last_process+1)%NPROC;
+        continue;
+      }
+      //if process runnable and has container id 0 then run it no matter what
+      //else if process is runnable and is not in current container then go for next
+      
+
+      if(p->container_id!=0){
+        cprintf("Container + %d : Scheduling process + %d\n",cid,p->pid);
+      }
+
+      set_last_process_of_container(last_process,cid);
       c->proc = p;
-      /*
-      signal handling now in between these lines
-      */      
-     int *a2;
-     char* virtual_address;
+      int *a2;
+      char* virtual_address;
       for(int i=0;i<NSIG;i++){
         if(p->pendingSignals[i]>0){
           // cprintf("i is %d and handler is %d\n", i,(int)p->signalHandlers[i] );
@@ -476,7 +492,71 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
+      break;
     }
+    // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    //   if(p->state != RUNNABLE)
+    //     continue;
+
+    //   // Switch to chosen process.  It is the process's job
+    //   // to release ptable.lock and then reacquire it
+    //   // before jumping back to us.
+    //   c->proc = p;
+    //   /*
+    //   signal handling now in between these lines
+    //   */      
+    //  int *a2;
+    //  char* virtual_address;
+    //   for(int i=0;i<NSIG;i++){
+    //     if(p->pendingSignals[i]>0){
+    //       // cprintf("i is %d and handler is %d\n", i,(int)p->signalHandlers[i] );
+    //       switch ((int)p->signalHandlers[i])
+    //       {
+    //         case SIGIGN:
+    //           tempHandler = ignoreHandler;
+    //           (*tempHandler)();
+    //           p->pendingSignals[i] = 0;
+    //           break;
+    //         case SIGDFL:
+    //           tempHandler = dflHandler;
+    //           (*tempHandler)();
+    //           p->pendingSignals[i] = 0;
+    //           break;
+    //         case SIGMSGSENT:
+    //           tempHandler = receiverHandler;
+    //           (*tempHandler)();
+    //           p->pendingSignals[i] = 0;
+    //           break;
+    //         default:
+
+    //           virtual_address = uva2ka(p->pgdir, (char*)p->tf->esp);
+    //           // if ((curproc->tf->esp & 0xFFF) == 0){
+    //           //   panic("esp_offset == 0");
+    //           // }
+                
+              
+    //           a2 = (int *) (virtual_address + ((p->tf->esp -4) &0xFFF) );
+    //           *a2 = p->tf->eip;
+              
+    //           p->tf->esp -= 4;
+
+    //           p->tf->eip = (uint)p->signalHandlers[i];
+    //           // change_space(p->signalHandlers[i]);
+    //           // p->signalHandlers[i] = (sighandler_t) SIGDFL;
+    //           p->pendingSignals[i] = 0;
+    //           break;
+    //       }
+    //     }
+    //   }
+    //   switchuvm(p);
+    //   p->state = RUNNING;
+    //   swtch(&(c->scheduler), p->context);
+    //   switchkvm();
+
+    //   // Process is done running for now.
+    //   // It should have changed its p->state before coming back.
+    //   c->proc = 0;
+    // }
     release(&ptable.lock);
 
   }

@@ -35,7 +35,7 @@ struct context {
 };
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
-enum v_procstate { V_UNUSED, V_EMBRYO, V_SLEEPING, V_RUNNABLE, V_RUNNING, V_ZOMBIE };
+
 
 // Per-process state
 struct proc {
@@ -57,7 +57,6 @@ struct proc {
   int pendingSignals[NSIG];
   MessageBuffer msg_from_multicast;
   //custom for assignment 3
-  enum v_procstate v_state;    // Virtual process state <-----------------added
   int container_id;            // Container ID to which it belongs <------added
 };
 

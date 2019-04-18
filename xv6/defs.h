@@ -222,3 +222,7 @@ void            container_init(void);
 int             destroy_container_kernel(int a);
 int             set_process_to_container(int pid,int cid);
 int             remove_process_from_container(int pid,int cid);
+int             get_container_last_process(int cid);
+int*            get_container_processes_to_run(int cid);
+void            set_last_process_of_container(int last_process,int cid);
+int             get_container_to_run();

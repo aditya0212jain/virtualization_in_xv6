@@ -75,7 +75,7 @@ ls(char *path)
 int main(void)
 {
 	int cid[3];
-	int nchild = 16;
+	int nchild = 10;
 	
 	cid[0] = create_container();
 	cid[1] = create_container();
@@ -84,31 +84,29 @@ int main(void)
 	printf(1,"%d\n",cid[1]);
 	printf(1,"%d\n",cid[2]);
 	int fd ;
-	// fd = open("backup", O_CREATE | O_RDWR);
 
-	
-	
 	for(int i=0;i<nchild;i++){
 		int x = fork();
 		if(x==0){
 			join_container(cid[i%3]);
 			if(i==0){
 				fd = open("backup", O_CREATE | O_RDWR);
-							if(fd >= 0){
-					printf(1, "creat small succeeded; ok\n");
+				if(fd >= 0){
+					printf(1, "creat small succeeded %d \n",fd);
 				} else {
 					printf(1, "error: creat small failed!\n");
 					
 				}
 			}
-			if(i==3){
-				ls(".");
-			}
+			// if(i==1){
+			// 	ls(".");
+			// }
 			exit();
 		}
 	}
 	sleep(5);
-	ps();
+	// ls(".");
+	// ps();
 	for(int i=0;i<nchild;i++){
 		wait();
 	}

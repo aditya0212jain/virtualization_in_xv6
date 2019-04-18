@@ -14,6 +14,8 @@ struct container
 {
     int status;//alive or dead
     int proc[NPROC];
+    int runstate; // 0 for waiting , 1 for ready
+    int last_process;
     // need to implement page table 
     // and file descriptor table
     // scheduling operation
@@ -23,6 +25,8 @@ struct {
     struct spinlock lock;
     struct container container[NCONTAINER];
 } container_table;
+
+int current_container = 0;
 
 
 void 
@@ -35,6 +39,7 @@ container_init()
             container_table.container[i].proc[j] = 0;
         }
         container_table.container[i].status = 0;
+        container_table.container[i].last_process = 0;
     }
     
 }
@@ -92,4 +97,41 @@ remove_process_from_container(int pid,int cid)
     }
     release(&container_table.lock);   
     return 0;
+}
+
+int
+get_container_to_run(){
+    int count =0;
+    int cid = (current_container+1)%NCONTAINER;
+    acquire(&container_table.lock);
+    while(count<NCONTAINER){
+        if(container_table.container[cid].status==1){
+            current_container = cid;
+            break;
+        }
+        cid = (cid+1)%NCONTAINER;
+        count++;
+    }
+    release(&container_table.lock);
+    return current_container;
+}
+
+int*
+get_container_processes_to_run(int cid)
+{
+    return container_table.container[cid].proc;
+}
+
+int 
+get_container_last_process(int cid)
+{
+    return container_table.container[cid].last_process;
+}
+
+void
+set_last_process_of_container(int last_process,int cid)
+{
+    acquire(&container_table.lock);
+    container_table.container[cid].last_process = last_process;
+    release(&container_table.lock);
 }

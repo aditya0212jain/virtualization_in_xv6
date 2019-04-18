@@ -75,7 +75,7 @@ sys_read(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
-  if(f->ip->container_id==myproc()->container_id){
+  if(f->ip->container_id==myproc()->container_id || f->ip->container_id ==0 ){
     return fileread(f, p, n);
   }else{
     return -1;
@@ -314,32 +314,30 @@ sys_open(void)
     return -1;
 
   begin_op();
-  cprintf("Container id in open : %d\n",myproc()->container_id);
 
   if(omode & O_CREATE){
     ip = create(path, T_FILE, 0, 0);
-    cprintf("5\n");
     if(ip == 0){
       end_op();
       return -1;
     }
-    cprintf("6\n");
+    cprintf("Creating file : Setting container id : %d \n",myproc()->container_id);
     ip->container_id = myproc()->container_id;
   } else {
     if((ip = namei(path)) == 0){
       end_op();
-      cprintf("7\n");
+      // cprintf("7\n");
       return -1;
     }
     ilock(ip);
     if(ip->type == T_DIR && omode != O_RDONLY){
       iunlockput(ip);
       end_op();
-      cprintf("8\n");
+      // cprintf("8\n");
       return -1;
     }
   }
-  cprintf("4\n");
+  // cprintf("4\n");
   if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
     if(f)
       fileclose(f);
@@ -350,15 +348,15 @@ sys_open(void)
   }
   iunlock(ip);
   end_op();
-  cprintf("2\n");
-  f->type = FD_INODE;
-  f->ip = ip;
-  f->off = 0;
-  f->readable = !(omode & O_WRONLY);
-  f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
-  cprintf("1\n");
-  if (f->ip->container_id==myproc()->container_id){
-    cprintf("fd %d \n",fd);
+  // cprintf("2\n");
+  
+  // cprintf("Before returning %d \n",fd);
+  if (ip->container_id==myproc()->container_id || ip->container_id==0 ){
+    f->type = FD_INODE;
+    f->ip = ip;
+    f->off = 0;
+    f->readable = !(omode & O_WRONLY);
+    f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
     return fd;
   }
   return -1;
