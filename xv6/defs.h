@@ -129,6 +129,7 @@ int             sent_to_proc_buffer(int s_pid,int r_pid,void *msg);
 int             receive_from_procbuffer(int myid,void* msg);
 ///added for assignment 3
 int             destroy_container_processes(int pid,int a,int pcid);
+void            set_scheduler_logger(int a);
 
 
 // swtch.S
@@ -226,3 +227,4 @@ int             get_container_last_process(int cid);
 int*            get_container_processes_to_run(int cid);
 void            set_last_process_of_container(int last_process,int cid);
 int             get_container_to_run();
+char*           get_space_in_container(int cid,int units,int* t);

@@ -80,31 +80,34 @@ int main(void)
 	cid[0] = create_container();
 	cid[1] = create_container();
 	cid[2] = create_container();
-	printf(1,"%d\n",cid[0]);
-	printf(1,"%d\n",cid[1]);
-	printf(1,"%d\n",cid[2]);
-	int fd ;
-
+	// int fd ;
+	// scheduler_log_on();
 	for(int i=0;i<nchild;i++){
 		int x = fork();
 		if(x==0){
 			join_container(cid[i%3]);
-			if(i==0){
-				fd = open("backup", O_CREATE | O_RDWR);
-				if(fd >= 0){
-					printf(1, "creat small succeeded %d \n",fd);
-				} else {
-					printf(1, "error: creat small failed!\n");
+			if(i<2){
+				// fd = open("backup", O_CREATE | O_RDWR);
+				// if(fd >= 0){
+				// 	printf(1, "create small succeeded %d \n",fd);
+				// } else {
+				// 	printf(1, "error: creat small failed!\n");
 					
-				}
+				// }
+				container_malloc(23);
+				container_malloc(46);
 			}
+			// while(1){}
+			// }
 			// if(i==1){
 			// 	ls(".");
 			// }
 			exit();
 		}
 	}
-	sleep(5);
+	
+	// sleep(500);
+	// scheduler_log_off();
 	// ls(".");
 	// ps();
 	for(int i=0;i<nchild;i++){

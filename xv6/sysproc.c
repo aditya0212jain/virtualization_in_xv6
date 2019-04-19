@@ -7,6 +7,8 @@
 #include "mmu.h"
 #include "proc.h"
 
+int memory_log = 0;
+
 int
 sys_fork(void)
 {
@@ -297,4 +299,51 @@ sys_leave_container(void)
   int stat = remove_process_from_container(myproc()->pid,myproc()->container_id);
   myproc()->container_id = 0;/// <-------- Check this line for specs
   return stat;
+}
+
+int 
+sys_scheduler_log_on(void)
+{
+  set_scheduler_logger(1);
+  return 0;
+}
+
+int
+sys_scheduler_log_off(void)
+{
+  set_scheduler_logger(0);
+  return 0;
+}
+
+char*
+sys_container_malloc(void)
+{
+  int units;
+  argint(0,&units);
+  int t;
+  if(units<4096){
+    char* addr = get_space_in_container(myproc()->container_id,units,&t);
+    if(memory_log==1){
+      cprintf("Container %d : GVA %d -> HVA %p\n",myproc()->container_id,t,addr);
+    }
+    return addr;
+  }else{
+    return (char*)-1;
+  }
+  // void* t = &a;
+  
+}
+
+int 
+sys_memory_log_on(void)
+{
+  memory_log = 1;
+  return 0;
+}
+
+int 
+sys_memory_log_off(void)
+{
+  memory_log = 0;
+  return 0;
 }

@@ -38,3 +38,8 @@
 #define SYS_destroy_container 35
 #define SYS_join_container 36
 #define SYS_leave_container 37
+#define SYS_scheduler_log_on 38
+#define SYS_scheduler_log_off 39
+#define SYS_container_malloc 40
+#define SYS_memory_log_on 41
+#define SYS_memory_log_off 42

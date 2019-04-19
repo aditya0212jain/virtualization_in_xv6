@@ -16,6 +16,8 @@ struct container
     int proc[NPROC];
     int runstate; // 0 for waiting , 1 for ready
     int last_process;
+    char* space_mapping[100];
+    int last_space;
     // need to implement page table 
     // and file descriptor table
     // scheduling operation
@@ -40,6 +42,7 @@ container_init()
         }
         container_table.container[i].status = 0;
         container_table.container[i].last_process = 0;
+        container_table.container[i].last_space = 0;
     }
     
 }
@@ -134,4 +137,17 @@ set_last_process_of_container(int last_process,int cid)
     acquire(&container_table.lock);
     container_table.container[cid].last_process = last_process;
     release(&container_table.lock);
+}
+
+char*
+get_space_in_container(int cid,int units,int* t)
+{
+    acquire(&container_table.lock);
+    int index = container_table.container[cid].last_space;
+    char* result = kalloc();
+    container_table.container[cid].space_mapping[index] = result;
+    container_table.container[cid].last_space += 1;// use cycle
+    release(&container_table.lock);
+    *t = index;
+    return result;
 }

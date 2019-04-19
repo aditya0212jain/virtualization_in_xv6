@@ -10,8 +10,8 @@
 
 
 /////Defined on 8th Feb for systrace
-int syscall_trace[38]={0};
-char numToCall[38][30] = {
+int syscall_trace[43]={0};
+char numToCall[43][30] = {
       "random",
       "sys_fork",
       "sys_exit",
@@ -49,7 +49,12 @@ char numToCall[38][30] = {
       "sys_create_container",
       "sys_destroy_container",
       "sys_join_container",
-      "sys_leave_container"
+      "sys_leave_container",
+      "sys_scheduler_log_on",
+      "sys_scheduler_log_off",
+      "sys_container_malloc",
+      "sys_memory_log_on",
+      "sys_memory_log_off"
 };
 int sys_trace=0;//change this before submission
 //////////////////////////////
@@ -167,6 +172,11 @@ extern int sys_create_container(void);
 extern int sys_destroy_container(void);
 extern int sys_join_container(void);
 extern int sys_leave_container(void);
+extern int sys_scheduler_log_on(void);
+extern int sys_scheduler_log_off(void);
+extern int sys_container_malloc(void);
+extern int sys_memory_log_on(void);
+extern int sys_memory_log_off(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -206,6 +216,11 @@ static int (*syscalls[])(void) = {
 [SYS_destroy_container] sys_destroy_container,
 [SYS_join_container] sys_join_container,
 [SYS_leave_container] sys_leave_container,
+[SYS_scheduler_log_on] sys_scheduler_log_on,
+[SYS_scheduler_log_off] sys_scheduler_log_off,
+[SYS_container_malloc] sys_container_malloc,
+[SYS_memory_log_on] sys_memory_log_on,
+[SYS_memory_log_off] sys_memory_log_off,
 };
 
 

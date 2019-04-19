@@ -22,6 +22,8 @@ static void wakeup1(void *chan);
 
 struct spinlock procbuffer_lock[NPROC];
 
+int scheduler_logger = 0;
+
 void
 pinit(void)
 {
@@ -435,7 +437,7 @@ scheduler(void)
       //else if process is runnable and is not in current container then go for next
       
 
-      if(p->container_id!=0){
+      if(p->container_id!=0 && scheduler_logger==1 ){
         cprintf("Container + %d : Scheduling process + %d\n",cid,p->pid);
       }
 
@@ -864,4 +866,10 @@ destroy_container_processes(int pid,int a,int pcid)
     kill(pid);
   }
   return 0;
+}
+
+void
+set_scheduler_logger(int a)
+{
+  scheduler_logger = a;
 }

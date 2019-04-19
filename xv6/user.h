@@ -40,7 +40,11 @@ int create_container(void);
 int destroy_container(int);
 int leave_container(void);
 int join_container(int);
-
+int scheduler_log_on(void);
+int scheduler_log_off(void);
+void* container_malloc(int);
+int memory_log_on(void);
+int memory_log_off(void);
 
 // ulib.c
 int stat(const char*, struct stat*);
