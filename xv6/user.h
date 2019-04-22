@@ -45,6 +45,8 @@ int scheduler_log_off(void);
 void* container_malloc(int);
 int memory_log_on(void);
 int memory_log_off(void);
+int get_file_container_id(int fd, struct stat*);
+int get_container_id(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -16,6 +16,26 @@
 #include "file.h"
 #include "fcntl.h"
 
+char* initial_files[29] = {".","..","init","console","shutdown","arr","cat","README","assig2a.inp","assig2b.inp","echo","forktest","grep","kill","ln","ls","mkdir","rm","sh","stressfs","usertests","wc","zombie","user_toggle","user_add","user_my","print_count","jacob","maekawa"};
+char* initial_files_with_dot[29] = {"./.","./..","./init","./console","./shutdown","./arr","./cat","./README","./assig2a.inp","./assig2b.inp","./echo","./forktest","./grep","./kill","./ln","./ls","./mkdir","./rm","./sh","./stressfs","./usertests","./wc","./zombie","./user_toggle","./user_add","./user_my","./print_count","./jacob","./maekawa"};
+
+int 
+in_initial_files(char* path)
+{
+  for(int i=0;i<29;i++){
+    if(strncmp(path,initial_files[i],strlen(path))==0){
+      return 1;
+    }
+  }
+  for(int i=0;i<29;i++){
+    if(strncmp(path,initial_files_with_dot[i],strlen(path))==0){
+      return 1;
+    }
+  }
+  
+  return 0;
+}
+
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
 static int
@@ -301,6 +321,25 @@ create(char *path, short type, short major, short minor)
   return ip;
 }
 
+char*
+fmtname2(char *path)
+{
+  static char buf[DIRSIZ+1];
+  char *p;
+
+  // Find first character after last slash.
+  for(p=path+strlen(path); p >= path && *p != '/'; p--)
+    ;
+  p++;
+
+  // Return blank-padded name.
+  if(strlen(p) >= DIRSIZ)
+    return p;
+  memmove(buf, p, strlen(p));
+  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  return buf;
+}
+
 int
 sys_open(void)
 {
@@ -315,42 +354,66 @@ sys_open(void)
 
   begin_op();
 
+  char* buf =kalloc();
+
+  if(in_initial_files(path)==1){
+    // cprintf("initial file : %s\n",path);
+  }else{
+    // cprintf("not intiial file %s\n",path);
+    int stln = strlen(path);
+    buf = safestrcpy(buf,path,stln+1);
+    if(omode & O_CREATE){
+      *(path+stln) = '$';
+      *(path+stln+1) = myproc()->container_id + '0';
+      *(path+stln+2) = '\0';
+    }else{
+      if(*(path+stln-2)!='$'){ // so that when ls is called it does not append extra $
+        *(path+stln) = '$';
+        *(path+stln+1) = myproc()->container_id + '0';
+        *(path+stln+2) = '\0'; 
+      }
+    }
+  }
+
+
+
   if(omode & O_CREATE){
+    //CREATE PATH
     ip = create(path, T_FILE, 0, 0);
     if(ip == 0){
       end_op();
       return -1;
     }
-    cprintf("Creating file : Setting container id : %d \n",myproc()->container_id);
     ip->container_id = myproc()->container_id;
+    cprintf("OPEN: fd %s %d\n",path,ip->container_id);
   } else {
+
     if((ip = namei(path)) == 0){
       end_op();
-      // cprintf("7\n");
+      cprintf("5\n");
       return -1;
     }
     ilock(ip);
     if(ip->type == T_DIR && omode != O_RDONLY){
       iunlockput(ip);
       end_op();
-      // cprintf("8\n");
+      // cprintf("6\n");
       return -1;
     }
   }
-  // cprintf("4\n");
   if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
     if(f)
       fileclose(f);
     iunlockput(ip);
     end_op();
-    cprintf("3\n");
+    // cprintf("8\n");
     return -1;
   }
   iunlock(ip);
   end_op();
   // cprintf("2\n");
   
-  // cprintf("Before returning %d \n",fd);
+  // cprintf("Before returning ip->cid : %d mp->cid : %d \n",ip->container_id,myproc()->container_id);
   if (ip->container_id==myproc()->container_id || ip->container_id==0 ){
     f->type = FD_INODE;
     f->ip = ip;
@@ -475,4 +538,16 @@ sys_pipe(void)
   fd[0] = fd0;
   fd[1] = fd1;
   return 0;
+}
+
+
+int
+sys_get_file_container_id(void)
+{
+  struct file *f;
+  struct stat *st;
+
+  if(argfd(0, 0, &f) < 0 || argptr(1, (void*)&st, sizeof(*st)) < 0)
+    return -1;
+  return f->ip->container_id;
 }

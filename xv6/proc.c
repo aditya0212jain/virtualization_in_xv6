@@ -437,7 +437,7 @@ scheduler(void)
       //else if process is runnable and is not in current container then go for next
       
 
-      if(p->container_id!=0 && scheduler_logger==1 ){
+      if(scheduler_logger==1 ){//p->container_id!=0 && 
         cprintf("Container + %d : Scheduling process + %d\n",cid,p->pid);
       }
 

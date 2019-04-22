@@ -43,3 +43,5 @@
 #define SYS_container_malloc 40
 #define SYS_memory_log_on 41
 #define SYS_memory_log_off 42
+#define SYS_get_file_container_id 43
+#define SYS_get_container_id 44

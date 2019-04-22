@@ -7,7 +7,7 @@
 #include "mmu.h"
 #include "proc.h"
 
-int memory_log = 0;
+int memory_log[NCONTAINER] = {0};
 
 int
 sys_fork(void)
@@ -323,7 +323,7 @@ sys_container_malloc(void)
   int t;
   if(units<4096){
     char* addr = get_space_in_container(myproc()->container_id,units,&t);
-    if(memory_log==1){
+    if(memory_log[myproc()->container_id]==1){
       cprintf("Container %d : GVA %d -> HVA %p\n",myproc()->container_id,t,addr);
     }
     return addr;
@@ -337,13 +337,19 @@ sys_container_malloc(void)
 int 
 sys_memory_log_on(void)
 {
-  memory_log = 1;
+  memory_log[myproc()->container_id] = 1;
   return 0;
 }
 
 int 
 sys_memory_log_off(void)
 {
-  memory_log = 0;
+  memory_log[myproc()->container_id] = 0;
   return 0;
+}
+
+int
+sys_get_container_id(void)
+{
+  return myproc()->container_id;
 }

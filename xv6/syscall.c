@@ -10,8 +10,8 @@
 
 
 /////Defined on 8th Feb for systrace
-int syscall_trace[43]={0};
-char numToCall[43][30] = {
+int syscall_trace[45]={0};
+char numToCall[45][30] = {
       "random",
       "sys_fork",
       "sys_exit",
@@ -54,7 +54,9 @@ char numToCall[43][30] = {
       "sys_scheduler_log_off",
       "sys_container_malloc",
       "sys_memory_log_on",
-      "sys_memory_log_off"
+      "sys_memory_log_off",
+      "sys_get_file_container_id",
+      "sys_get_container_id"
 };
 int sys_trace=0;//change this before submission
 //////////////////////////////
@@ -177,6 +179,8 @@ extern int sys_scheduler_log_off(void);
 extern int sys_container_malloc(void);
 extern int sys_memory_log_on(void);
 extern int sys_memory_log_off(void);
+extern int sys_get_file_container_id(void);
+extern int sys_get_container_id(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -221,6 +225,8 @@ static int (*syscalls[])(void) = {
 [SYS_container_malloc] sys_container_malloc,
 [SYS_memory_log_on] sys_memory_log_on,
 [SYS_memory_log_off] sys_memory_log_off,
+[SYS_get_file_container_id] sys_get_file_container_id,
+[SYS_get_container_id] sys_get_container_id,
 };
 
 
