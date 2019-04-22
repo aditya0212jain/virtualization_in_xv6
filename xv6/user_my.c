@@ -23,6 +23,7 @@ fmtname(char *path)
   return buf;
 }
 
+
 void
 ls(char *path)
 {
@@ -66,8 +67,10 @@ ls(char *path)
 				printf(1, "ls: cannot stat %s\n", buf);
 				continue;
 			}
-			printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
-		  	printf(1,"it is in container : %s \n",p);
+			char* printname = fmtname(buf);
+			*(printname + strlen(p)-2) = '\0';
+			printf(1, "%s %d %d %d\n", printname, st.type, st.ino, st.size);
+		  	// printf(1,"it is in container : %s \n",p);
 		  }
 		  
 	  }else{
@@ -83,11 +86,34 @@ ls(char *path)
   close(fd);
 }
 
+void
+cat(char* name)
+{
+
+  int fd = open(name,0);
+  int n;
+  char buf[512];
+//   printf(1,"inside cat fd : %d\n",fd);
+  while((n = read(fd, buf, sizeof(buf))) > 0) {
+    if (write(1, buf, n) != n) {
+      printf(1, "cat: write error\n");
+      exit();
+    }
+  }
+  if(n < 0){
+    printf(1, "cat: read error\n");
+    exit();
+  }
+//   close(fd);
+}
+
 int main(void)
 {
 	int cid[3];
 	int nchild = 10;
-	
+	// int status = 0;
+	// char* argv[] = {"."};
+	// status = exec("ls",argv);
 	cid[0] = create_container();
 	cid[1] = create_container();
 	cid[2] = create_container();
@@ -97,52 +123,48 @@ int main(void)
 		int x = fork();
 		if(x==0){
 			join_container(cid[i%3]);
-			if(i<2){
+			if(i<3){
 				fd = open("backup", O_CREATE | O_RDWR);
 				if(fd >= 0){
 					printf(1, "create small succeeded %d \n",fd);
 				} else {
 					printf(1, "error: creat small failed!\n");
 				}
-				memory_log_on();
-				container_malloc(23);
-				container_malloc(46);
-				memory_log_off();
-				
+				// memory_log_on();
+				// container_malloc(23);
+				// container_malloc(46);
+				// memory_log_off();
+				char* to = "Modified by:  ";
+				*(to+strlen(to)-1) = getpid() +'0';
+				if(write(fd,to,14)!=14){
+					printf(1,"error while writing\n");
+				}
+				// close(fd);
+				cat("backup");
+				close(fd);
 			}
-			if(i==6){
-				ls(".");
-			}
+			// if(i==0){
+			// 	ls(".");
+			// }
 			exit();
 		}
 	}
 
-	// char* temp1[2];
-	// temp1[1]= "yash";
-	// temp1[0] = "";
-	// char* t2 = "yash";
-	// char* t3 = "yash";
-	// for(int i=0;i<2;i++){
-	// 	if(strcmp(temp1[i],t2)==0){
-	// 		printf(1,"Compared : %d\n",i);
-	// 	}else{
-	// 		printf(1,"Not matches\n");
-	// 	}
-	// }
-
 	
 	// scheduler_log_off();
-	// fd = open("backup", O_CREATE | O_RDWR);
+	// int fd = open("backup1", O_CREATE | O_RDWR);
 	// if(fd >= 0){
 	// 	printf(1, "create small succeeded %d \n",fd);
 	// } else {
 	// 	printf(1, "error: creat small failed!\n");
 	// }
+	
 	// char* to = "aditya";
 	// if(write(fd,to,6)!=6){
 	// 	printf(1,"error while writing\n");
 	// }
-	// int fd2 = open("backup", O_CREATE | O_RDWR );
+	// close(fd);
+	// int fd2 = open("backup2", O_CREATE | O_RDWR );
 	// if(fd2 >= 0){
 	// 	printf(1, "create small succeeded %d \n",fd);
 	// } else {
@@ -152,12 +174,17 @@ int main(void)
 	// if(write(fd2,to2,6)!=6){
 	// 	printf(1,"error while writing\n");
 	// }
+	// close(fd2);
+	// int fd3 = open("backup1",0);
 
 	// sleep(500);
 	// scheduler_log_off();
-	
+	// cat(fd3);
 	// ps();
 	// ls(".");
+	
+	// printf(1,"satus : %d\n",status);
+
 	for(int i=0;i<nchild;i++){
 		wait();
 	}

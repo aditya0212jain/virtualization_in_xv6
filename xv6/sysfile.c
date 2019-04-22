@@ -98,6 +98,7 @@ sys_read(void)
   if(f->ip->container_id==myproc()->container_id || f->ip->container_id ==0 ){
     return fileread(f, p, n);
   }else{
+    cprintf("wrong acces in read\n");
     return -1;
   }
 }
@@ -111,7 +112,8 @@ sys_write(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
-  
+
+
   if(f->ip->container_id==0){
     return filewrite(f,p,n);
   }
@@ -385,7 +387,7 @@ sys_open(void)
       return -1;
     }
     ip->container_id = myproc()->container_id;
-    cprintf("OPEN: fd %s %d\n",path,ip->container_id);
+    // cprintf("OPEN: fd %s %d\n",path,ip->container_id);
   } else {
 
     if((ip = namei(path)) == 0){
@@ -397,7 +399,7 @@ sys_open(void)
     if(ip->type == T_DIR && omode != O_RDONLY){
       iunlockput(ip);
       end_op();
-      // cprintf("6\n");
+      cprintf("6\n");
       return -1;
     }
   }
@@ -406,7 +408,7 @@ sys_open(void)
       fileclose(f);
     iunlockput(ip);
     end_op();
-    // cprintf("8\n");
+    cprintf("8\n");
     return -1;
   }
   iunlock(ip);
@@ -422,6 +424,7 @@ sys_open(void)
     f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
     return fd;
   }
+  // cprintf("this is new fd : %d \n",fd);
   return -1;
 }
 

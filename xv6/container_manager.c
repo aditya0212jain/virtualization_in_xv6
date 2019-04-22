@@ -18,6 +18,7 @@ struct container
     int last_process;
     char* space_mapping[100];
     int last_space;
+    char* files_of_container[100];
     // need to implement page table 
     // and file descriptor table
     // scheduling operation
