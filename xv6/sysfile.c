@@ -98,7 +98,7 @@ sys_read(void)
   if(f->ip->container_id==myproc()->container_id || f->ip->container_id ==0 ){
     return fileread(f, p, n);
   }else{
-    cprintf("wrong acces in read\n");
+    // cprintf("wrong acces in read\n");
     return -1;
   }
 }
@@ -360,6 +360,7 @@ sys_open(void)
 
   if(in_initial_files(path)==1){
     // IF an existing file is opened
+    // cprintf("initila file %s\n",path);
     if(myproc()->container_id!=0){
       if(omode == 0){
         //read only then
@@ -384,6 +385,7 @@ sys_open(void)
         *(path+stln) = '$';
         *(path+stln+1) = myproc()->container_id + '0';
         *(path+stln+2) = '\0';
+        cprintf(" path changed for %s\n",path);
         if(in_container==0){
           // file is opened first time for writing so 
           //make a copy of the file

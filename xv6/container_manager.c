@@ -169,9 +169,16 @@ int
 file_in_container(char* s, int cid)
 {
     int ans = 0;
+    int stln = strlen(s);
+    char* buf = kalloc();
+    buf = strncpy(buf,s,strlen(s));
+    *(buf+stln) = '$';
+    *(buf+stln+1) = cid + '0';
+    *(buf+stln+2) = '\0';
+    
     acquire(&container_table.lock);
     for(int i=0;i<100 && i < container_table.container[cid].last_file_index;i++){
-        int status = strncmp(container_table.container[cid].files_of_container[i],s,strlen(s));
+        int status = strncmp(container_table.container[cid].files_of_container[i],buf,strlen(buf));
         if(status==0){
             ans = 1;
             break;

@@ -134,14 +134,14 @@ int main(void)
 				// container_malloc(23);
 				// container_malloc(46);
 				// memory_log_off();
-				char* to = "Modified by:  ";
-				*(to+strlen(to)-1) = getpid() +'0';
-				if(write(fd,to,14)!=14){
-					printf(1,"error while writing\n");
-				}
+				// char* to = "Modified by:  ";
+				// *(to+strlen(to)-1) = getpid() +'0';
+				// if(write(fd,to,14)!=14){
+				// 	printf(1,"error while writing\n");
+				// }
+				// // close(fd);
+				// cat("backup");
 				// close(fd);
-				cat("backup");
-				close(fd);
 			}
 			// if(i==0){
 			// 	ls(".");
@@ -181,7 +181,7 @@ int main(void)
 	// scheduler_log_off();
 	// cat(fd3);
 	// ps();
-	// ls(".");
+	ls(".");
 	
 	// printf(1,"satus : %d\n",status);
 
