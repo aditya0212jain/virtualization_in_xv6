@@ -356,14 +356,48 @@ sys_open(void)
 
   begin_op();
 
-  char* buf =kalloc();
+  // char* buf =kalloc();
 
   if(in_initial_files(path)==1){
     // cprintf("initial file : %s\n",path);
+    if(myproc()->container_id!=0){
+      if(omode == 0){
+        //read only then
+        int in_container = file_in_container(path,myproc()->container_id);
+        if(in_container==0){
+          //do not change if it has never been written
+        }else{
+          // file has been opened before for writing so 
+          //change the name so that correct copy of the file is opened
+          *(path+stln) = '$';
+          *(path+stln+1) = myproc()->container_id + '0';
+          *(path+stln+2) = '\0';
+        }
+      }
+      if((omode & O_WRONLY) || (omode & O_RDWR)){
+        //init file is opened for reading and writing so 
+        //make a copy of the file for writing
+        int stln = strlen(path);
+        // path sent below is the original file name
+        int in_container = file_in_container(path,myproc()->container_id);
+        *(path+stln) = '$';
+        *(path+stln+1) = myproc()->container_id + '0';
+        *(path+stln+2) = '\0';
+        if(in_container==0){
+          // file is opened first time for writing so 
+          //make a copy of the file
+
+          set_file_in_container(path,myproc()->container_id);
+        }else{
+          //a copy has already been created before so do nothing
+          
+        }
+      }
+    }
   }else{
     // cprintf("not intiial file %s\n",path);
     int stln = strlen(path);
-    buf = safestrcpy(buf,path,stln+1);
+    // buf = safestrcpy(buf,path,stln+1);
     if(omode & O_CREATE){
       *(path+stln) = '$';
       *(path+stln+1) = myproc()->container_id + '0';
