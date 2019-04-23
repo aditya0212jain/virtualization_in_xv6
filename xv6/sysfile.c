@@ -655,10 +655,17 @@ sys_pipe(void)
 int
 sys_get_file_container_id(void)
 {
-  struct file *f;
-  struct stat *st;
+  char *path;
 
-  if(argfd(0, 0, &f) < 0 || argptr(1, (void*)&st, sizeof(*st)) < 0)
+  if(argstr(0, &path) < 0)
     return -1;
-  return f->ip->container_id;
+
+  char* buf = kalloc();
+  buf = strncpy(buf,path,strlen(path)+1);
+  *(buf+strlen(path)-2) = '\0';
+  // cprintf("opened call for %s from cid %d\n",path,myproc()->container_id);
+  if(in_initial_files(path)==1 || file_in_container(path,0)==1 ){
+    return 0;
+  }
+  return -1;
 }

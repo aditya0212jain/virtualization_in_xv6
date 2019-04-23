@@ -61,25 +61,33 @@ ls(char *path)
         continue;
       memmove(p, de.name, DIRSIZ);
       p[DIRSIZ] = 0;
+	//   printf(1,"%s\n",p);
+	  
 	  if(*(p+strlen(p)-2)=='$'){
 		  if(*(p+strlen(p)-1) == get_container_id() +'0'){
-			if(stat(buf, &st) < 0){
-				printf(1, "ls: cannot stat %s\n", buf);
-				continue;
-			}
-			char* printname = fmtname(buf);
-			*(printname + strlen(p)-2) = '\0';
-			printf(1, "%s %d %d %d\n", printname, st.type, st.ino, st.size);
+			  if(get_file_container_id(p)!=0){
+				  *(p+strlen(p)-2) = '\0';
+				  printf(1,"%s\n",p);
+			  }
+			// if(stat(buf, &st) < 0){
+			// 	printf(1, "ls: cannot stat %s\n", buf);
+			// 	continue;
+			// }
+			// char* printname = fmtname(buf);
+			// *(printname + strlen(p)-2) = '\0';
+			// printf(1, "%s %d %d %d %s\n", printname, st.type, st.ino, st.size,p);
 		  	// printf(1,"it is in container : %s \n",p);
 		  }
-		  
 	  }else{
-		if(stat(buf, &st) < 0){
-			printf(1, "ls: cannot stat %s\n", buf);
-			continue;
-		}
-		printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
-	  }
+		  printf(1,"%s\n",p);
+	  }	  
+	//   }else{
+	// 	if(stat(buf, &st) < 0){
+	// 		printf(1, "ls: cannot stat %s\n", buf);
+	// 		continue;
+	// 	}
+	// 	printf(1, "%s %d %d %d %s\n", fmtname(buf), st.type, st.ino, st.size,p);
+	//   }
     }
     break;
   }
@@ -131,6 +139,7 @@ int main(void)
 	}
 	// cat("backup");
 	close(fd);
+	
 	// scheduler_log_on();
 	for(int i=0;i<nchild;i++){
 		int x = fork();
@@ -156,11 +165,14 @@ int main(void)
 				}
 				// cat("backup");
 				close(fd_c);
+				// ls(".");
 			}
 			if(i==1){
 				int fd2 = open("backup",O_RDONLY);
-				cat("backup");
+				// cat("backup");
 				close(fd2);
+				// ls(".");
+				
 			}
 			// if(i==0){
 			// 	ls(".");
@@ -200,7 +212,7 @@ int main(void)
 	// scheduler_log_off();
 	// cat(fd3);
 	// ps();
-	// ls(".");
+	ls(".");
 	
 	// printf(1,"satus : %d\n",status);
 

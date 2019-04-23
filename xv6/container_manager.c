@@ -73,6 +73,9 @@ destroy_container_kernel(int a)
     for(int i=0;i<NPROC;i++){
         container_table.container[a].proc[i] = 0;
     }
+    container_table.container[a].last_file_index = 0;
+    container_table.container[a].last_process = 0;
+    container_table.container[a].last_space = 0;
     release(&container_table.lock);
     return -1;
 }
@@ -170,8 +173,6 @@ file_in_container(char* s, int cid)
 {
     int ans = 0;
     int stln = strlen(s);
-    // char buf[14];
-    // char* a = strncpy(buf,s,strlen(s));
     char* a = kalloc();
     a = strncpy(a,s,strlen(s)+1);
     if(cid!=0){
@@ -179,8 +180,6 @@ file_in_container(char* s, int cid)
         *(a+stln+1) = cid + '0';
         *(a+stln+2) = '\0';
     }
-    // cprintf("fic for %s in cid %d \n",a,cid);
-    // cprintf("a is : %s\n",a);
     acquire(&container_table.lock);
     for(int i=0;i<100 && i < container_table.container[cid].last_file_index;i++){
         int status = strncmp(container_table.container[cid].files_of_container[i],a,strlen(a));
@@ -189,7 +188,6 @@ file_in_container(char* s, int cid)
             break;
         }
     }
-    // cprintf("fic return ans : %d\n",ans);
     release(&container_table.lock);
     return ans;
 }
