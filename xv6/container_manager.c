@@ -170,20 +170,26 @@ file_in_container(char* s, int cid)
 {
     int ans = 0;
     int stln = strlen(s);
-    char* buf = kalloc();
-    buf = strncpy(buf,s,strlen(s));
-    *(buf+stln) = '$';
-    *(buf+stln+1) = cid + '0';
-    *(buf+stln+2) = '\0';
-    
+    // char buf[14];
+    // char* a = strncpy(buf,s,strlen(s));
+    char* a = kalloc();
+    a = strncpy(a,s,strlen(s)+1);
+    if(cid!=0){
+        *(a+stln) = '$';
+        *(a+stln+1) = cid + '0';
+        *(a+stln+2) = '\0';
+    }
+    // cprintf("fic for %s in cid %d \n",a,cid);
+    // cprintf("a is : %s\n",a);
     acquire(&container_table.lock);
     for(int i=0;i<100 && i < container_table.container[cid].last_file_index;i++){
-        int status = strncmp(container_table.container[cid].files_of_container[i],buf,strlen(buf));
+        int status = strncmp(container_table.container[cid].files_of_container[i],a,strlen(a));
         if(status==0){
             ans = 1;
             break;
         }
     }
+    // cprintf("fic return ans : %d\n",ans);
     release(&container_table.lock);
     return ans;
 }

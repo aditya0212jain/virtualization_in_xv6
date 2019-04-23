@@ -97,12 +97,12 @@ cat(char* name)
   while((n = read(fd, buf, sizeof(buf))) > 0) {
     if (write(1, buf, n) != n) {
       printf(1, "cat: write error\n");
-      exit();
+    //   exit();
     }
   }
   if(n < 0){
     printf(1, "cat: read error\n");
-    exit();
+    // exit();
   }
 //   close(fd);
 }
@@ -117,31 +117,50 @@ int main(void)
 	cid[0] = create_container();
 	cid[1] = create_container();
 	cid[2] = create_container();
-	int fd ;
+	
+	int fd = open("backup", O_CREATE | O_RDWR);
+	// if(fd >= 0){
+	// 	printf(1, "create small succeeded %d \n",fd);
+	// } else {
+	// 	printf(1, "error: creat small failed!\n");
+	// }
+	
+	char* to = "aditya\n";
+	if(write(fd,to,7)!=7){
+		printf(1,"error while writing\n");
+	}
+	// cat("backup");
+	close(fd);
 	// scheduler_log_on();
 	for(int i=0;i<nchild;i++){
 		int x = fork();
 		if(x==0){
 			join_container(cid[i%3]);
-			if(i<3){
-				fd = open("backup", O_CREATE | O_RDWR);
-				if(fd >= 0){
-					printf(1, "create small succeeded %d \n",fd);
-				} else {
-					printf(1, "error: creat small failed!\n");
-				}
+			if(i<1){
+				int fd_c =0 ;
+				fd_c = open("backup",O_CREATE | O_RDWR);
+				// if(fd_c >= 0){
+				// 	printf(1, "create small succeeded %d \n",fd_c);
+				// } else {
+				// 	printf(1, "error: creat small failed!\n");
+				// }
+				// printf(1,"fd_c :%d\n",fd_c);
 				// memory_log_on();
 				// container_malloc(23);
 				// container_malloc(46);
 				// memory_log_off();
-				// char* to = "Modified by:  ";
-				// *(to+strlen(to)-1) = getpid() +'0';
-				// if(write(fd,to,14)!=14){
-				// 	printf(1,"error while writing\n");
-				// }
-				// // close(fd);
+				char* to = "Modified by:  \n";
+				*(to+strlen(to)-2) = getpid() +'0';
+				if(write(fd_c,to,15)!=15){
+					printf(1,"error while writing\n");
+				}
 				// cat("backup");
-				// close(fd);
+				close(fd_c);
+			}
+			if(i==1){
+				int fd2 = open("backup",O_RDONLY);
+				cat("backup");
+				close(fd2);
 			}
 			// if(i==0){
 			// 	ls(".");
@@ -181,7 +200,7 @@ int main(void)
 	// scheduler_log_off();
 	// cat(fd3);
 	// ps();
-	ls(".");
+	// ls(".");
 	
 	// printf(1,"satus : %d\n",status);
 

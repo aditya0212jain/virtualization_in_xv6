@@ -113,6 +113,7 @@ sys_write(void)
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
 
+  // cprintf("write is called\n");
 
   if(f->ip->container_id==0){
     return filewrite(f,p,n);
@@ -342,6 +343,63 @@ fmtname2(char *path)
   return buf;
 }
 
+int copy_helper_COW(char* copied_path,struct file* copied_file)
+{
+  // cprintf("to copy file is %s \n",copied_path);
+  char* buf = kalloc();
+  
+  if(*(copied_path+strlen(copied_path)-2)=='$'){
+    buf = strncpy(buf,copied_path,strlen(copied_path)+1);
+    *(buf+strlen(copied_path) - 2) = '\0';
+  }
+  // cprintf("original file was %s\n",buf);
+
+  int fd;
+  struct file *f;
+  struct inode *ip;
+
+  //opening original file for copying
+
+  begin_op();
+
+  if((ip = namei(buf)) == 0){
+      end_op();
+      cprintf("5\n");
+      return -1;
+    }
+  ilock(ip);
+  if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
+    if(f)
+      fileclose(f);
+    iunlockput(ip);
+    end_op();
+    cprintf("8\n");
+    return -1;
+  }
+  iunlock(ip);
+  end_op();
+
+  f->type = FD_INODE;
+  f->ip = ip;
+  f->off = 0;
+  f->readable = 1;
+  f->writable = 0;
+
+  //now f is the file of original and 
+  //copied_file is of the new copy file struct
+
+  int n;
+  char buf_for_copy[512];
+  // printf(1,"inside cat fd : %d\n",fd);
+  while((n=fileread(f,buf_for_copy,sizeof(buf)))>0){
+    if(filewrite(copied_file,buf_for_copy,n)!=n){
+      cprintf("write error while copying\n");
+      break;
+    }
+  }
+  return 1;
+}
+
 int
 sys_open(void)
 {
@@ -357,10 +415,11 @@ sys_open(void)
   begin_op();
 
   // char* buf =kalloc();
-
-  if(in_initial_files(path)==1){
+  int make_copy = 0;
+  // cprintf("opened call for %s from cid %d\n",path,myproc()->container_id);
+  if(in_initial_files(path)==1 || file_in_container(path,0)==1 ){
     // IF an existing file is opened
-    // cprintf("initila file %s\n",path);
+    // cprintf("initial file %s opened by cid : %d\n",path,myproc()->container_id);
     if(myproc()->container_id!=0){
       if(omode == 0){
         //read only then
@@ -385,11 +444,12 @@ sys_open(void)
         *(path+stln) = '$';
         *(path+stln+1) = myproc()->container_id + '0';
         *(path+stln+2) = '\0';
-        cprintf(" path changed for %s\n",path);
+        // cprintf(" path changed for %s\n",path);
         if(in_container==0){
           // file is opened first time for writing so 
-          //make a copy of the file
-
+          //make a copy of the file////////////////////////////////. TODO
+          make_copy = 1;
+          /////////////////////////////////////////////////////////////////
           set_file_in_container(path,myproc()->container_id);
         }else{
           //a copy has already been created before so do nothing
@@ -402,21 +462,28 @@ sys_open(void)
     int stln = strlen(path);
     // buf = safestrcpy(buf,path,stln+1);
     if(omode & O_CREATE){
-      *(path+stln) = '$';
-      *(path+stln+1) = myproc()->container_id + '0';
-      *(path+stln+2) = '\0';
-    }else{
-      if(*(path+stln-2)!='$'){ // so that when ls is called it does not append extra $
+      if(myproc()->container_id!=0){// checking if file is of cid 0
         *(path+stln) = '$';
         *(path+stln+1) = myproc()->container_id + '0';
-        *(path+stln+2) = '\0'; 
+        *(path+stln+2) = '\0';
       }
+      set_file_in_container(path,myproc()->container_id);
+      // cprintf("creating file %s in cid %d\n",path,myproc()->container_id);
+    }else{
+      if(*(path+stln-2)!='$'){ // so that when ls is called it does not append extra $
+        if(myproc()->container_id!=0){// checking if file if of cid 0
+          *(path+stln) = '$';
+          *(path+stln+1) = myproc()->container_id + '0';
+          *(path+stln+2) = '\0'; 
+        }
+      }
+      // cprintf("reading from file %s in cid : %d\n",path,myproc()->container_id);
     }
   }
 
 
 
-  if(omode & O_CREATE){
+  if((omode & O_CREATE) || make_copy==1){
     //CREATE PATH
     ip = create(path, T_FILE, 0, 0);
     if(ip == 0){
@@ -459,6 +526,10 @@ sys_open(void)
     f->off = 0;
     f->readable = !(omode & O_WRONLY);
     f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+    if(make_copy==1){
+      // cprintf("path is %s \n",path);
+      copy_helper_COW(path,f);
+    }
     return fd;
   }
   // cprintf("this is new fd : %d \n",fd);
@@ -559,11 +630,11 @@ sys_pipe(void)
   struct file *rf, *wf;
   int fd0, fd1;
   if(argptr(0, (void*)&fd, 2*sizeof(fd[0])) < 0){
-    cprintf("inside pipe 1\n");
+    // cprintf("inside pipe 1\n");
     return -1;
   }
   if(pipealloc(&rf, &wf) < 0){
-    cprintf("inside pipe 2\n");
+    // cprintf("inside pipe 2\n");
     return -1;
   }
   fd0 = -1;
@@ -572,7 +643,7 @@ sys_pipe(void)
       myproc()->ofile[fd0] = 0;
     fileclose(rf);
     fileclose(wf);
-    cprintf("inside pipe 3\n");
+    // cprintf("inside pipe 3\n");
     return -1;
   }
   fd[0] = fd0;
