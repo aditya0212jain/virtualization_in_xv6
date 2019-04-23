@@ -228,3 +228,5 @@ int*            get_container_processes_to_run(int cid);
 void            set_last_process_of_container(int last_process,int cid);
 int             get_container_to_run();
 char*           get_space_in_container(int cid,int units,int* t);
+int             file_in_container(char* s, int cid);
+void            set_file_in_container(char* s,int cid);

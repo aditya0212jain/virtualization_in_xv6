@@ -19,6 +19,7 @@ struct container
     char* space_mapping[100];
     int last_space;
     char* files_of_container[100];
+    int last_file_index;
     // need to implement page table 
     // and file descriptor table
     // scheduling operation
@@ -44,6 +45,7 @@ container_init()
         container_table.container[i].status = 0;
         container_table.container[i].last_process = 0;
         container_table.container[i].last_space = 0;
+        container_table.container[i].last_file_index = 0;
     }
     
 }
@@ -151,4 +153,30 @@ get_space_in_container(int cid,int units,int* t)
     release(&container_table.lock);
     *t = index;
     return result;
+}
+
+void 
+set_file_in_container(char* s,int cid)
+{
+    acquire(&container_table.lock);
+    int fd = container_table.container[cid].last_file_index;
+    container_table.container[cid].files_of_container[fd] = s;
+    container_table.container[cid].last_file_index += 1;
+    release(&container_table.lock);
+}
+
+int 
+file_in_container(char* s, int cid)
+{
+    int ans = 0;
+    acquire(&container_table.lock);
+    for(int i=0;i<100 && i < container_table.container[cid].last_file_index;i++){
+        int status = strncmp(container_table.container[cid].files_of_container[i],s,strlen(s));
+        if(status==0){
+            ans = 1;
+            break;
+        }
+    }
+    release(&container_table.lock);
+    return ans;
 }

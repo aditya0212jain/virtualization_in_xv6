@@ -359,7 +359,7 @@ sys_open(void)
   // char* buf =kalloc();
 
   if(in_initial_files(path)==1){
-    // cprintf("initial file : %s\n",path);
+    // IF an existing file is opened
     if(myproc()->container_id!=0){
       if(omode == 0){
         //read only then
@@ -369,6 +369,7 @@ sys_open(void)
         }else{
           // file has been opened before for writing so 
           //change the name so that correct copy of the file is opened
+          int stln = strlen(path);
           *(path+stln) = '$';
           *(path+stln+1) = myproc()->container_id + '0';
           *(path+stln+2) = '\0';
@@ -395,7 +396,7 @@ sys_open(void)
       }
     }
   }else{
-    // cprintf("not intiial file %s\n",path);
+    // NOT INITIAL FILE 
     int stln = strlen(path);
     // buf = safestrcpy(buf,path,stln+1);
     if(omode & O_CREATE){
