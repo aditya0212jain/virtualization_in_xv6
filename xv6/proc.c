@@ -437,8 +437,10 @@ scheduler(void)
       //else if process is runnable and is not in current container then go for next
       
 
-      if(scheduler_logger==1 ){//p->container_id!=0 && 
+      if(scheduler_logger==1 && p->container_id!=0 ){//p->container_id!=0 && 
+        // if(cid==1){
         cprintf("Container + %d : Scheduling process + %d\n",cid,p->pid);
+        // }
       }
 
       set_last_process_of_container(last_process,cid);
@@ -749,9 +751,13 @@ print_ps(int cid)
 {
   struct proc *p;
   acquire(&ptable.lock);
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state != UNUSED && p->container_id == cid)
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != UNUSED && p->container_id == cid){
       cprintf("pid:%d name:%s\n",p->pid,p->name);
+    }else if(p->state!=UNUSED && cid == 0){
+      cprintf("pid:%d name:%s\n",p->pid,p->name);
+    }
+  }
   release(&ptable.lock);
 }
 

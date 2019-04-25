@@ -118,70 +118,87 @@ cat(char* name)
 int main(void)
 {
 	int cid[3];
-	int nchild = 10;
-	// int status = 0;
-	// char* argv[] = {"."};
-	// status = exec("ls",argv);
+	int nchild = 9;
 	cid[0] = create_container();
 	cid[1] = create_container();
 	cid[2] = create_container();
 	
 	int fd = open("backup", O_CREATE | O_RDWR);
-	// if(fd >= 0){
+	if(fd >= 0){
+		printf(1, "create small succeeded %d \n",fd);
+	} else {
+		printf(1, "error: creat small failed!\n");
+	}
+	
+	// char* to = "aditya\n";
+	// if(write(fd,to,7)!=7){
+	// 	printf(1,"error while writing\n");
+	// }
+	// cat("backup");
+	// close(fd);
+	// int fd2 =open("backup", O_CREATE | O_RDWR);
+	// if(fd2 >= 0){
 	// 	printf(1, "create small succeeded %d \n",fd);
 	// } else {
 	// 	printf(1, "error: creat small failed!\n");
 	// }
-	
-	char* to = "aditya\n";
-	if(write(fd,to,7)!=7){
-		printf(1,"error while writing\n");
-	}
 	// cat("backup");
-	close(fd);
+	// close(fd2);
 	
 	// scheduler_log_on();
 	for(int i=0;i<nchild;i++){
 		int x = fork();
 		if(x==0){
 			join_container(cid[i%3]);
-			if(i<1){
+			// if(i>5){
+			// 	ps();
+			// }
+			// while(1){};	
+			if(i==0){
 				int fd_c =0 ;
-				fd_c = open("backup",O_CREATE | O_RDWR);
-				// if(fd_c >= 0){
+				fd_c = open("backup",O_CREATE | O_RDONLY);
+				if(fd_c < 0){
 				// 	printf(1, "create small succeeded %d \n",fd_c);
 				// } else {
-				// 	printf(1, "error: creat small failed!\n");
-				// }
+					printf(1, "error: creat small failed!\n");
+				}
 				// printf(1,"fd_c :%d\n",fd_c);
 				// memory_log_on();
 				// container_malloc(23);
 				// container_malloc(46);
 				// memory_log_off();
-				char* to = "Modified by:  \n";
-				*(to+strlen(to)-2) = getpid() +'0';
-				if(write(fd_c,to,15)!=15){
-					printf(1,"error while writing\n");
-				}
-				// cat("backup");
+				// char* to = "Modified by:  \n";
+				// *(to+strlen(to)-2) = getpid() +'0';
+				// if(write(fd_c,to,15)!=15){
+				// 	printf(1,"error while writing\n");
+				// }
+				
+				cat("backup");
 				close(fd_c);
 				// ls(".");
 			}
-			if(i==1){
-				int fd2 = open("backup",O_RDONLY);
-				// cat("backup");
-				close(fd2);
-				// ls(".");
-				
+			if(i==8){
+				leave_container();
+				ps();
+				ls(".");
 			}
+			// if(i==1){
+			// 	int fd2 = open("backup",O_RDONLY);
+			// 	// cat("backup");
+			// 	close(fd2);
+			// 	// ls(".");
+				
+			// }
 			// if(i==0){
 			// 	ls(".");
 			// }
+			
 			exit();
+
 		}
 	}
 
-	
+	// sleep(10);
 	// scheduler_log_off();
 	// int fd = open("backup1", O_CREATE | O_RDWR);
 	// if(fd >= 0){
@@ -211,9 +228,8 @@ int main(void)
 	// sleep(500);
 	// scheduler_log_off();
 	// cat(fd3);
+	// ls(".");
 	// ps();
-	ls(".");
-	
 	// printf(1,"satus : %d\n",status);
 
 	for(int i=0;i<nchild;i++){
